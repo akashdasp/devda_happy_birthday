@@ -1,7 +1,7 @@
 // helper functions
 const PI2 = Math.PI * 2;
 const random = (min, max) => Math.random() * (max - min + 1) + min | 0;
-const timestamp = _ => new Date().getTime();
+const timestamp = () => new Date().getTime();
 
 // container
 class Birthday {
@@ -12,22 +12,22 @@ class Birthday {
     this.fireworks = [];
     this.counter = 0;
   }
-  
+
   resize() {
     this.width = canvas.width = window.innerWidth;
     let center = this.width / 2 | 0;
     this.spawnA = center - center / 4 | 0;
     this.spawnB = center + center / 4 | 0;
-    
+
     this.height = canvas.height = window.innerHeight;
     this.spawnC = this.height * 0.1;
     this.spawnD = this.height * 0.5;
   }
-  
+
   onClick(evt) {
     let x = evt.clientX || evt.touches && evt.touches[0].pageX;
     let y = evt.clientY || evt.touches && evt.touches[0].pageY;
-     
+
     let count = random(3, 5);
     for (let i = 0; i < count; i++) {
       this.fireworks.push(new Firework(
@@ -39,10 +39,10 @@ class Birthday {
         random(30, 110)
       ));
     }
-    
+
     this.counter = -1;
   }
-  
+
   update(delta) {
     ctx.globalCompositeOperation = 'hard-light';
     ctx.fillStyle = `rgba(20,20,20,${ 7 * delta })`;
@@ -87,7 +87,7 @@ class Firework {
     this.shade = shade;
     this.history = [];
   }
-  
+
   update(delta) {
     if (this.dead) return;
 
@@ -112,16 +112,16 @@ class Firework {
       this.madeChilds = true;
       this.history.shift();
     }
-    
+
     if (this.history.length === 0) this.dead = true;
-    else if (this.offsprings) { 
+    else if (this.offsprings) {
       for (let i = 0; this.history.length > i; i++) {
         let point = this.history[i];
         ctx.beginPath();
         ctx.fillStyle = 'hsl(' + this.shade + ',100%,' + i + '%)';
         ctx.arc(point.x, point.y, 1, 0, PI2, false);
         ctx.fill();
-      } 
+      }
     } else {
       ctx.beginPath();
       ctx.fillStyle = 'hsl(' + this.shade + ',40%,50%)';
@@ -151,36 +151,37 @@ document.ontouchstart = evt => birthday.onClick(evt);
   birthday.update(delta / 1000);
 })();
 
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
   const loader = document.getElementById('loader');
   const content = document.getElementById('content');
   const loaderText = loader.querySelector('p');
   const audio = document.getElementById('background-music');
   const playButton = document.getElementById('play-music');
 
-  // Initial text
-  loaderText.textContent = 'Loading... Please wait';
+  const messages = [
+    'Loading... Please wait',
+    'Almost there...',
+    'Sorry for the Belated Happy birthday.....',
+    'Happy Birthday to you.....'
+  ];
 
-  setTimeout(() => {
-    // Change text after 2.5 seconds
-    loaderText.textContent = 'Almost there...';
-  }, 2500);
-  setTimeout(() => {
-    // Change text after 2.5 seconds
-    loaderText.textContent = 'Sorry for the Belated Happy birthday.....';
-  }, 2500);
-  setTimeout(() => {
-    // Change text after 2.5 seconds
-    loaderText.textContent = 'Happy Birthday to you.....'; 
-  }, 2500);
-  setTimeout(() => {
-    // Hide loader and show content after 5 seconds
-    loader.style.display = 'none';
-    content.style.display = 'block';
-  }, 5000);
+  let index = 0;
 
-  // Show play button
-  playButton.style.display = 'block';
+  function updateLoaderText() {
+    if (index < messages.length) {
+      loaderText.textContent = messages[index];
+      index++;
+      setTimeout(updateLoaderText, 1000);
+    } else {
+      // Hide loader and show content after all messages are displayed
+      loader.style.display = 'none';
+      content.style.display = 'block';
+      // Show play button
+      playButton.style.display = 'block';
+    }
+  }
+
+  updateLoaderText();
 
   playButton.addEventListener('click', () => {
     // Play background music on button click
@@ -189,5 +190,3 @@ window.addEventListener('load', function() {
     });
   });
 });
-
-  
